@@ -2,7 +2,7 @@ package net.triggergameevents;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.triggergameevents.commands.TriggerGameEventCommands;
+import net.triggergameevents.commands.TriggerGameEventCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +11,7 @@ public class Initialization implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		TriggerGameEventCommands.register();
+		TriggerGameEventCommand.register();
 		LOGGER.info("Game Events Trigger has successfully loaded!");
 	}
 }
