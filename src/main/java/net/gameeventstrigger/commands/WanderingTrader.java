@@ -1,4 +1,4 @@
-package net.gameeventstrigger.command;
+package net.gameeventstrigger.commands;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.entity.EntityType;

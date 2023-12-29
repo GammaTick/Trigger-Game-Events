@@ -2,7 +2,7 @@ package net.gameeventstrigger;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.gameeventstrigger.command.TriggerGameEventCommands;
+import net.gameeventstrigger.commands.TriggerGameEventCommands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
