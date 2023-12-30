@@ -16,7 +16,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"net.gameeventstrigger.Initialization"
+			"net.triggergameevents.Initialization"
 		],
 		"fabric-datagen": [
 			"net.gameeventstrigger.GameEventsTriggerDataGenerator"
