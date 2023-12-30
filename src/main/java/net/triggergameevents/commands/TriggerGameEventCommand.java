@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class TriggerGameEventCommands {
+public class TriggerGameEventCommand {
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(literal("gameevent").requires(source -> source.hasPermissionLevel(2))
                 .then(literal("spawnpillagerpatrol")
@@ -24,7 +24,7 @@ public class TriggerGameEventCommands {
                                 .then(argument("blockposition", BlockPosArgumentType.blockPos())
                                         .executes(context -> spawnPillagerPatrol(context, BlockPosArgumentType.getBlockPos(context, "blockposition"), null, false))
                                         .then(argument("targetposition", BlockPosArgumentType.blockPos())
-                                                .executes(context -> spawnPillagerPatrol(context, BlockPosArgumentType.getBlockPos(context, "blockposition"), BlockPosArgumentType.getBlockPos(context, "targetposition"), false))))
+                                                .executes(context -> spawnPillagerPatrol(context, BlockPosArgumentType.getBlockPos(context, "blockposition"), BlockPosArgumentType.getBlockPos(context, "targetposition"), false))))))
 
                 .then(literal("spawnwanderingtrader")
                         .executes(context -> spawnWanderingTrader(context, null, null, false))
@@ -36,8 +36,14 @@ public class TriggerGameEventCommands {
                                         .executes(context -> spawnWanderingTrader(context, BlockPosArgumentType.getBlockPos(context, "blockposition"), null, false)))))
 
                 .then(literal("spawnzombiesiege")
-                        .executes(context -> spawnZombieSiege(context, null, false)))
-        ))));
+                        .executes(context -> spawnZombieSiege(context, null, false))
+                        .then(literal("at")
+                                .then(argument("entity", EntityArgumentType.entity())
+                                        .executes(context -> spawnZombieSiege(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), false)))
+
+                                .then(argument("blockposition", BlockPosArgumentType.blockPos())
+                                        .executes(context -> spawnZombieSiege(context, BlockPosArgumentType.getBlockPos(context, "blockposition"), false)))))
+        ));
     }
 
     public static int spawnPillagerPatrol(CommandContext<ServerCommandSource> context, BlockPos spawnPos, BlockPos targetPos, boolean forceSpawn) {
