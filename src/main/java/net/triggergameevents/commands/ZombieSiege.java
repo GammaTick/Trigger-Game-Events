@@ -7,7 +7,11 @@ import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.text.Texts;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -19,29 +23,37 @@ public class ZombieSiege {
     private static int startX;
     private static int startZ;
     private static int remaining;
+    private static boolean successfulSpawn;
 
-    public static int spawn(CommandContext<ServerCommandSource> context, BlockPos pos, boolean forceSpawn) {
+    public static int spawn(CommandContext<ServerCommandSource> context, BlockPos spawnPos, boolean forceSpawn) {
         ServerWorld world = context.getSource().getWorld().toServerWorld();
 
-        if (pos == null) {
+        if (spawnPos == null) {
             if (!spawn(context, world)) {
                 return 0;
             }
         } else {
-            pos = new BlockPos(pos.getX(), world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos.getX() ,pos.getZ()), pos.getZ());
+            spawnPos = new BlockPos(spawnPos.getX(), world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, spawnPos.getX() ,spawnPos.getZ()), spawnPos.getZ());
             remaining = 20;
-            startX = pos.getX();
-            startZ = pos.getZ();
+            startX = spawnPos.getX();
+            startZ = spawnPos.getZ();
         }
 
-        context.getSource().sendFeedback(() -> Text.of("Well"), false);
-
         while (remaining > 0) {
-            trySpawnZombie(context, world);
+            successfulSpawn = trySpawnZombie(context, world);
             --remaining;
         }
 
-        return 1;
+        if (successfulSpawn) {
+            final BlockPos spawnSpawnPos = spawnPos;
+            MutableText coordinates = Texts.bracketed(Text.translatable("%s, %s, %s", spawnPos.getX(), spawnPos.getY(), spawnPos.getZ())).styled(style -> style.withColor(Formatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + spawnSpawnPos.getX() + " " + spawnSpawnPos.getY() + " " + spawnSpawnPos.getZ())));
+            context.getSource().sendFeedback(() -> Text.translatable("Successfully spawned a  zombie siege at %s", coordinates), true);
+            return 1;
+        } else {
+            context.getSource().sendError(Text.of("Unable to spawn a zombie siege"));
+        }
+
+        return 0;
     }
 
     private static boolean spawn(CommandContext<ServerCommandSource> context, World world) {
@@ -60,7 +72,7 @@ public class ZombieSiege {
         return false;
     }
 
-    private static void trySpawnZombie(CommandContext<ServerCommandSource> context, ServerWorld world) {
+    private static boolean trySpawnZombie(CommandContext<ServerCommandSource> context, ServerWorld world) {
         Vec3d vec3d = getSpawnVector(world, new BlockPos(startX, world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, startX ,startZ), startZ));
         if (vec3d != null) {
             ZombieEntity zombieEntity;
@@ -69,12 +81,14 @@ public class ZombieSiege {
                 zombieEntity.initialize(world, world.getLocalDifficulty(zombieEntity.getBlockPos()), SpawnReason.EVENT, null, null);
             } catch (Exception var5) {
                 context.getSource().sendFeedback(() -> Text.translatable("Failed to create zombie for village siege at %s %s", vec3d, var5), true);
-                return;
+                return false;
             }
 
             zombieEntity.refreshPositionAndAngles(vec3d.x, vec3d.y, vec3d.z, world.random.nextFloat() * 360.0F, 0.0F);
             world.spawnEntityAndPassengers(zombieEntity);
+            return true;
         }
+        return false;
     }
 
     private static Vec3d getSpawnVector(ServerWorld world, BlockPos pos) {

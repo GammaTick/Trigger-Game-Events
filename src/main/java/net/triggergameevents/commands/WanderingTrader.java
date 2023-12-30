@@ -72,7 +72,7 @@ public class WanderingTrader {
             return 1;
         }
 
-        context.getSource().sendError(Text.of("Unable to summon a wandering trader"));
+        context.getSource().sendError(Text.of("Unable to spawn a wandering trader"));
         return 0;
     }
 
