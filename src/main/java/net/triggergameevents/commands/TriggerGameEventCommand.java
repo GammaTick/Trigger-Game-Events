@@ -1,5 +1,6 @@
 package net.triggergameevents.commands;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.BlockPosArgumentType;
@@ -13,36 +14,30 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class TriggerGameEventCommand {
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(literal("gameevent").requires(source -> source.hasPermissionLevel(2))
-                .then(literal("spawnpillagerpatrol")
+                .then(literal("spawn_pillager_patrol")
                         .executes(context -> spawnPillagerPatrol(context, null, null, false))
+
                         .then(literal("at")
                                 .then(argument("entity", EntityArgumentType.entity())
+
                                         .executes(context -> spawnPillagerPatrol(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), null, false))
-                                        .then(argument("targetposition", BlockPosArgumentType.blockPos())
-                                                .executes(context -> spawnPillagerPatrol(context, BlockPosArgumentType.getBlockPos(context, "blockposition"), BlockPosArgumentType.getBlockPos(context, "targetposition"), false))))
+                                        .then(argument("target_entity_position", EntityArgumentType.entity())
+                                                .executes(context -> spawnPillagerPatrol(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), EntityArgumentType.getEntity(context, "target_entity_position").getBlockPos(), false))
+                                                .then(argument("force_spawn", BoolArgumentType.bool())
+                                                        .executes(context -> spawnPillagerPatrol(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), EntityArgumentType.getEntity(context, "target_entity_position").getBlockPos(), BoolArgumentType.getBool(context, "force_spawn")))))
 
-                                .then(argument("blockposition", BlockPosArgumentType.blockPos())
-                                        .executes(context -> spawnPillagerPatrol(context, BlockPosArgumentType.getBlockPos(context, "blockposition"), null, false))
-                                        .then(argument("targetposition", BlockPosArgumentType.blockPos())
-                                                .executes(context -> spawnPillagerPatrol(context, BlockPosArgumentType.getBlockPos(context, "blockposition"), BlockPosArgumentType.getBlockPos(context, "targetposition"), false))))))
+                                        .then(argument("target_block_position", BlockPosArgumentType.blockPos())
+                                                .executes(context -> spawnPillagerPatrol(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), BlockPosArgumentType.getBlockPos(context, "target_block_position"), false))
+                                                .then(argument("force_spawn", BoolArgumentType.bool())
+                                                        .executes(context -> spawnPillagerPatrol(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), BlockPosArgumentType.getBlockPos(context, "target_block_position"), BoolArgumentType.getBool(context, "force_spawn")))))
 
-                .then(literal("spawnwanderingtrader")
-                        .executes(context -> spawnWanderingTrader(context, null, null, false))
-                        .then(literal("at")
-                                .then(argument("entity", EntityArgumentType.entity())
-                                        .executes(context -> spawnWanderingTrader(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), null, false)))
+                                        .then(literal("random_target_position")
+                                                .executes(context -> spawnPillagerPatrol(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), null, false))
+                                                .then(argument("force_spawn", BoolArgumentType.bool())
+                                                        .executes(context -> spawnPillagerPatrol(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), null, BoolArgumentType.getBool(context, "force_spawn"))))))
 
-                                .then(argument("blockposition", BlockPosArgumentType.blockPos())
-                                        .executes(context -> spawnWanderingTrader(context, BlockPosArgumentType.getBlockPos(context, "blockposition"), null, false)))))
-
-                .then(literal("spawnzombiesiege")
-                        .executes(context -> spawnZombieSiege(context, null, false))
-                        .then(literal("at")
-                                .then(argument("entity", EntityArgumentType.entity())
-                                        .executes(context -> spawnZombieSiege(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), false)))
-
-                                .then(argument("blockposition", BlockPosArgumentType.blockPos())
-                                        .executes(context -> spawnZombieSiege(context, BlockPosArgumentType.getBlockPos(context, "blockposition"), false)))))
+                                .then(argument("block_position", BlockPosArgumentType.blockPos())
+                                        .executes(context -> spawnPillagerPatrol(context, BlockPosArgumentType.getBlockPos(context, "block_position"), null, false)))))
         ));
     }
 
