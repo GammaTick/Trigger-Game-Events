@@ -33,7 +33,7 @@ public class TriggerGameEventCommand {
                                                 .then(argument("force_spawn", BoolArgumentType.bool())
                                                         .executes(context -> spawnPillagerPatrol(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), BlockPosArgumentType.getBlockPos(context, "target_block_position"), BoolArgumentType.getBool(context, "force_spawn"), -1))
                                                         .then(argument("number_of_pillagers", IntegerArgumentType.integer(0, 8192))
-                                                                .executes(context -> spawnPillagerPatrol(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), EntityArgumentType.getEntity(context, "target_entity_position").getBlockPos(), BoolArgumentType.getBool(context, "force_spawn"), IntegerArgumentType.getInteger(context, "number_of_pillagers"))))))
+                                                                .executes(context -> spawnPillagerPatrol(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), BlockPosArgumentType.getBlockPos(context, "target_block_position"), BoolArgumentType.getBool(context, "force_spawn"), IntegerArgumentType.getInteger(context, "number_of_pillagers"))))))
 
                                         .then(literal("random_target_position")
                                                 .executes(context -> spawnPillagerPatrol(context, EntityArgumentType.getEntity(context, "entity").getBlockPos(), null, false, -1))
@@ -56,7 +56,7 @@ public class TriggerGameEventCommand {
                                                 .then(argument("force_spawn", BoolArgumentType.bool())
                                                         .executes(context -> spawnPillagerPatrol(context, BlockPosArgumentType.getBlockPos(context, "block_position"), BlockPosArgumentType.getBlockPos(context, "target_block_position"), BoolArgumentType.getBool(context, "force_spawn"), -1))
                                                         .then(argument("number_of_pillagers", IntegerArgumentType.integer(0, 8192))
-                                                                .executes(context -> spawnPillagerPatrol(context, BlockPosArgumentType.getBlockPos(context, "block_position"), EntityArgumentType.getEntity(context, "target_entity_position").getBlockPos(), BoolArgumentType.getBool(context, "force_spawn"), IntegerArgumentType.getInteger(context, "number_of_pillagers"))))))
+                                                                .executes(context -> spawnPillagerPatrol(context, BlockPosArgumentType.getBlockPos(context, "block_position"), BlockPosArgumentType.getBlockPos(context, "target_block_position"), BoolArgumentType.getBool(context, "force_spawn"), IntegerArgumentType.getInteger(context, "number_of_pillagers"))))))
 
                                         .then(literal("random_target_position")
                                                 .executes(context -> spawnPillagerPatrol(context, BlockPosArgumentType.getBlockPos(context, "block_position"), null, false, -1))
