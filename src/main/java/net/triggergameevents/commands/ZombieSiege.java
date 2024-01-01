@@ -22,7 +22,6 @@ import net.minecraft.world.World;
 public class ZombieSiege {
     private static int startX;
     private static int startZ;
-    private static int remaining;
     private static boolean successfulSpawn;
 
     public static int spawn(CommandContext<ServerCommandSource> context, BlockPos spawnPos, boolean forceSpawn) {
@@ -32,22 +31,23 @@ public class ZombieSiege {
             if (!spawn(context, world)) {
                 return 0;
             }
+            spawnPos = new BlockPos(startX, world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, startX, startZ), startZ);
         } else {
             spawnPos = new BlockPos(spawnPos.getX(), world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, spawnPos.getX() ,spawnPos.getZ()), spawnPos.getZ());
-            remaining = 20;
             startX = spawnPos.getX();
             startZ = spawnPos.getZ();
         }
+        int remaining = 20;
 
         while (remaining > 0) {
-            successfulSpawn = trySpawnZombie(context, world);
+            successfulSpawn = trySpawnZombie(world);
             --remaining;
         }
 
         if (successfulSpawn) {
             final BlockPos spawnSpawnPos = spawnPos;
             MutableText coordinates = Texts.bracketed(Text.translatable("%s, %s, %s", spawnPos.getX(), spawnPos.getY(), spawnPos.getZ())).styled(style -> style.withColor(Formatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + spawnSpawnPos.getX() + " " + spawnSpawnPos.getY() + " " + spawnSpawnPos.getZ())));
-            context.getSource().sendFeedback(() -> Text.translatable("Successfully spawned a  zombie siege at %s", coordinates), true);
+            context.getSource().sendFeedback(() -> Text.translatable("Successfully spawned a zombie siege at %s", coordinates), true);
             return 1;
         } else {
             context.getSource().sendError(Text.of("Unable to spawn a zombie siege"));
@@ -64,7 +64,6 @@ public class ZombieSiege {
             startZ = blockPos.getZ() + MathHelper.floor(MathHelper.sin(f) * 32.0F);
 
             if (getSpawnVector(context.getSource().getWorld().toServerWorld(), new BlockPos(startX, world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, startX ,startZ), startZ)) != null) {
-                remaining = 20;
                 return true;
             }
         }
@@ -72,18 +71,12 @@ public class ZombieSiege {
         return false;
     }
 
-    private static boolean trySpawnZombie(CommandContext<ServerCommandSource> context, ServerWorld world) {
+    private static boolean trySpawnZombie(ServerWorld world) {
         Vec3d vec3d = getSpawnVector(world, new BlockPos(startX, world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, startX ,startZ), startZ));
         if (vec3d != null) {
             ZombieEntity zombieEntity;
-            try {
-                zombieEntity = new ZombieEntity(world);
-                zombieEntity.initialize(world, world.getLocalDifficulty(zombieEntity.getBlockPos()), SpawnReason.EVENT, null, null);
-            } catch (Exception var5) {
-                context.getSource().sendFeedback(() -> Text.translatable("Failed to create zombie for village siege at %s %s", vec3d, var5), true);
-                return false;
-            }
-
+            zombieEntity = new ZombieEntity(world);
+            zombieEntity.initialize(world, world.getLocalDifficulty(zombieEntity.getBlockPos()), SpawnReason.EVENT, null, null);
             zombieEntity.refreshPositionAndAngles(vec3d.x, vec3d.y, vec3d.z, world.random.nextFloat() * 360.0F, 0.0F);
             world.spawnEntityAndPassengers(zombieEntity);
             return true;
@@ -96,7 +89,7 @@ public class ZombieSiege {
 
             int j = pos.getX() + world.random.nextInt(16) - 8;
             int k = pos.getZ() + world.random.nextInt(16) - 8;
-            int l = world.getTopY(Heightmap.Type.WORLD_SURFACE, j, k);
+            int l = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, j, k);
             BlockPos blockPos = new BlockPos(j, l, k);
 
             BlockState blockState = world.getBlockState(pos);

@@ -19,7 +19,7 @@ import net.minecraft.world.Heightmap;
 import net.minecraft.world.SpawnHelper;
 
 public class PillagerPatrol {
-    public static int spawn(CommandContext<ServerCommandSource> context, BlockPos spawnPos, BlockPos targetPos, boolean forceSpawn) {
+    public static int spawn(CommandContext<ServerCommandSource> context, BlockPos spawnPos, BlockPos targetPos, boolean forceSpawn, int pillagerCount) {
         ServerWorld world = context.getSource().getWorld().toServerWorld();
 
         if (world.getDifficulty().equals(Difficulty.PEACEFUL)) {
@@ -37,7 +37,13 @@ public class PillagerPatrol {
         }
 
         int spawnedPillagers = 0;
-        int expectedPillagers = (int)Math.ceil(world.getLocalDifficulty(spawnPos).getLocalDifficulty()) + 1;
+        int expectedPillagers;
+
+        if (pillagerCount == -1) {
+            expectedPillagers = (int) Math.ceil(world.getLocalDifficulty(spawnPos).getLocalDifficulty()) + 1;
+        } else {
+            expectedPillagers = pillagerCount;
+        }
 
         for (int i = 0; i < expectedPillagers; ++i) {
             if (i == 0) {
